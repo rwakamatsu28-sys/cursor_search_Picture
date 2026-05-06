@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body { margin: 0; height: 100vh; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
+        #input-container {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px;
+            text-align: center; color: white; backdrop-filter: blur(5px); z-index: 100;
+        }
+        input { padding: 12px; width: 400px; border: none; border-radius: 5px; font-size: 14px; outline: none; }
+        #moving-img {
+            position: absolute; width: 200px; pointer-events: none;
+            display: none; z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="input-container">
+        <h3>GoogleドライブのURLを貼り付けてEnter</h3>
+        <input type="text" id="file-input" placeholder="https://drive.google.com/file/d/...">
+    </div>
+
+    <img id="moving-img" src="" alt="following-image">
+
+    <script type="py">
+        from pyscript import document
+        from pyodide.ffi import create_proxy
+        import re
+
+        img = document.querySelector("#moving-img")
+        input_field = document.querySelector("#file-input")
+        container = document.querySelector("#input-container")
+
+        def start_process(event):
+            if event.key == "Enter":
+                raw_value = input_field.value.strip()
+                
+                # URLの中からID部分（英数字の羅列）だけを抽出する正規表現
+                match = re.search(r'/d/([^/]+)', raw_value)
+                
+                if match:
+                    file_id = match.group(1)
+                else:
+                    # URLじゃなくてIDが直接入力された場合
+                    file_id = raw_value
+
+                if file_id:
+                    # 最も表示されやすいサムネイル用のURL形式を使用
+                    img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={file_id}"
+                    img.style.display = "block"
+                    container.style.display = "none"
+
+        def on_mouse_move(event):
+            if img.style.display == "block":
+                x = event.pageX - (img.offsetWidth / 2)
+                y = event.pageY - (img.offsetHeight / 2)
+                img.style.left = f"{x}px"
+                img.style.top = f"{y}px"
+
+        # 登録
+        document.querySelector("#file-input").addEventListener("keydown", create_proxy(start_process))
+        document.addEventListener("mousemove", create_proxy(on_mouse_move))
+    </script>
+</body>
+</html>
