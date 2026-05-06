@@ -2,67 +2,58 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <title>My Cursor Follower</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        body { margin: 0; height: 100vh; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
-        #input-container {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px;
-            text-align: center; color: white; backdrop-filter: blur(5px); z-index: 100;
+        /* 背景色や全体のレイアウト */
+        body { 
+            margin: 0; 
+            height: 100vh; 
+            overflow: hidden; 
+            background-color: #1a1a1a; 
+            cursor: crosshair; /* カーソルを十字にして見やすく */
         }
-        input { padding: 12px; width: 400px; border: none; border-radius: 5px; font-size: 14px; outline: none; }
+        
+        /* 動く画像の設定 */
         #moving-img {
-            position: absolute; width: 200px; pointer-events: none;
-            display: none; z-index: 50;
+            position: absolute; 
+            width: 200px; /* 画像の大きさ */
+            pointer-events: none; 
+            display: none; 
+            z-index: 50;
+            /* 少しふわっと動かしたい場合は↓のコメントアウトを外す */
+            /* transition: transform 0.1s ease-out; */
         }
     </style>
 </head>
 <body>
-
-    <div id="input-container">
-        <h3>GoogleドライブのURLを貼り付けてEnter</h3>
-        <input type="text" id="file-input" placeholder="https://drive.google.com/file/d/...">
-    </div>
 
     <img id="moving-img" src="" alt="following-image">
 
     <script type="py">
         from pyscript import document
         from pyodide.ffi import create_proxy
-        import re
 
         img = document.querySelector("#moving-img")
-        input_field = document.querySelector("#file-input")
-        container = document.querySelector("#input-container")
 
-        # --- 初期表示の設定 ---
-        initial_id = "1T9khz3huKwUyC45UvoL9dYChB7HgIfii" 
-        img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={initial_id}"
+        # --- 設定エリア：ここにIDを入れるだけ ---
+        FILE_ID = "1T9khz3huKwUyC45UvoL9dYChB7HgIfii" 
+
+        # 起動時に画像をセットして表示
+        img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={FILE_ID}"
         img.style.display = "block"
-        container.style.display = "none" 
-
-        def start_process(event):
-            if event.key == "Enter":
-                raw_value = input_field.value.strip()
-                match = re.search(r'/d/([^/]+)', raw_value)
-                file_id = match.group(1) if match else raw_value
-
-                if file_id:
-                    img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={file_id}"
-                    img.style.display = "block"
-                    container.style.display = "none"
 
         def on_mouse_move(event):
-            if img.style.display == "block":
-                x = event.pageX - (img.offsetWidth / 2)
-                y = event.pageY - (img.offsetHeight / 2)
-                img.style.left = f"{x}px"
-                img.style.top = f"{y}px"
+            # 画像の中心がマウスに重なるように計算
+            x = event.pageX - (img.offsetWidth / 2)
+            y = event.pageY - (img.offsetHeight / 2)
+            img.style.left = f"{x}px"
+            img.style.top = f"{y}px"
 
-        # イベント登録
-        document.querySelector("#file-input").addEventListener("keydown", create_proxy(start_process))
-        document.addEventListener("mousemove", create_proxy(on_mouse_move))
+        # マウス移動イベントだけを登録
+        move_handler = create_proxy(on_mouse_move)
+        document.addEventListener("mousemove", move_handler)
     </script>
 </body>
 </html>
