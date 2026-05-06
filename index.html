@@ -37,23 +37,15 @@
         container = document.querySelector("#input-container")
 
         def start_process(event):
+            # Enterキーが押されたら
             if event.key == "Enter":
-                raw_value = input_field.value.strip()
+                # ↓ ここに入力欄を無視して、表示したい画像のIDを直接書く
+                file_id = "1T9khz3huKwUyC45UvoL9dYChB7HgIfii" 
                 
-                # URLの中からID部分（英数字の羅列）だけを抽出する正規表現
-                match = re.search(r'/d/([^/]+)', raw_value)
-                
-                if match:
-                    file_id = match.group(1)
-                else:
-                    # URLじゃなくてIDが直接入力された場合
-                    file_id = raw_value
-
-                if file_id:
-                    # 最も表示されやすいサムネイル用のURL形式を使用
-                    img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={file_id}"
-                    img.style.display = "block"
-                    container.style.display = "none"
+                # サムネイルURLをセット
+                img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={file_id}"
+                img.style.display = "block"
+                container.style.display = "none"
 
         def on_mouse_move(event):
             if img.style.display == "block":
