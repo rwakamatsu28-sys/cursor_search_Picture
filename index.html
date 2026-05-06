@@ -2,28 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>My Cursor Follower</title>
+    <title>Cursor Follower</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
-        /* 背景色や全体のレイアウト */
-        body { 
-            margin: 0; 
-            height: 100vh; 
-            overflow: hidden; 
-            background-color: #1a1a1a; 
-            cursor: crosshair; /* カーソルを十字にして見やすく */
-        }
-        
-        /* 動く画像の設定 */
+        body { margin: 0; height: 100vh; overflow: hidden; background-color: #1a1a1a; cursor: crosshair; }
         #moving-img {
-            position: absolute; 
-            width: 200px; /* 画像の大きさ */
-            pointer-events: none; 
-            display: none; 
-            z-index: 50;
-            /* 少しふわっと動かしたい場合は↓のコメントアウトを外す */
-            /* transition: transform 0.1s ease-out; */
+            position: absolute; width: 200px; pointer-events: none;
+            display: none; z-index: 50;
         }
     </style>
 </head>
@@ -37,23 +23,20 @@
 
         img = document.querySelector("#moving-img")
 
-        # --- 設定エリア：ここにIDを入れるだけ ---
+        # 表示させたい画像のID（あなたのURLから抽出したもの）
         FILE_ID = "1T9khz3huKwUyC45UvoL9dYChB7HgIfii" 
 
-        # 起動時に画像をセットして表示
+        # 読み込み時にすぐ画像を表示
         img.src = f"https://drive.google.com/thumbnail?authuser=0&sz=w1000&id={FILE_ID}"
         img.style.display = "block"
 
         def on_mouse_move(event):
-            # 画像の中心がマウスに重なるように計算
             x = event.pageX - (img.offsetWidth / 2)
             y = event.pageY - (img.offsetHeight / 2)
             img.style.left = f"{x}px"
             img.style.top = f"{y}px"
 
-        # マウス移動イベントだけを登録
-        move_handler = create_proxy(on_mouse_move)
-        document.addEventListener("mousemove", move_handler)
+        document.addEventListener("mousemove", create_proxy(on_mouse_move))
     </script>
 </body>
 </html>
